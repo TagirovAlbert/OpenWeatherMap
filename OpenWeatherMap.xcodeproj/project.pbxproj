@@ -12,6 +12,7 @@
 		81DE2EFE1D9D255B00F78BB9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81DE2EFC1D9D255B00F78BB9 /* Main.storyboard */; };
 		81DE2F001D9D255B00F78BB9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 81DE2EFF1D9D255B00F78BB9 /* Assets.xcassets */; };
 		81DE2F031D9D255B00F78BB9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81DE2F011D9D255B00F78BB9 /* LaunchScreen.storyboard */; };
+		81DE2F0B1D9D257E00F78BB9 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 81DE2F0A1D9D257E00F78BB9 /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +23,7 @@
 		81DE2EFF1D9D255B00F78BB9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		81DE2F021D9D255B00F78BB9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		81DE2F041D9D255B00F78BB9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		81DE2F0A1D9D257E00F78BB9 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,6 +40,7 @@
 		81DE2EEC1D9D255B00F78BB9 = {
 			isa = PBXGroup;
 			children = (
+				81DE2F0A1D9D257E00F78BB9 /* README.md */,
 				81DE2EF71D9D255B00F78BB9 /* OpenWeatherMap */,
 				81DE2EF61D9D255B00F78BB9 /* Products */,
 			);
@@ -137,6 +140,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				81DE2F0B1D9D257E00F78BB9 /* README.md in Sources */,
 				81DE2EFB1D9D255B00F78BB9 /* ViewController.swift in Sources */,
 				81DE2EF91D9D255B00F78BB9 /* AppDelegate.swift in Sources */,
 			);
