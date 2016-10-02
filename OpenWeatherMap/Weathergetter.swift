@@ -9,18 +9,26 @@
 import UIKit
 import Alamofire
 import SwiftyJSON
+import RealmSwift
 
 class WeatherGetter {
     
     
     private let openWeatherMapBaseURL = "http://api.openweathermap.org/data/2.5/weather"
     private let openWeatherApiKey = "c8b562de206b5661b16a81721c73799e"
-    var weather = Weather()
+    private var weather = Weather()
     
+    func getWeatherqw (city: String){
+        Alamofire.request("\(openWeatherMapBaseURL)?APPID=\(openWeatherApiKey)&q=Salavat",method: .get).validate().responseJSON { (response) in
+            
+            if let Json = response.result.value{
+                print(Json)
+            }
+        }
+    }
     
-    
-    func getWeather (city: String) -> Weather{
-        Alamofire.request( "\(openWeatherMapBaseURL)?APPID=\(openWeatherApiKey)&q=\(city)",method: .get).validate().responseJSON { (response) in
+    func setWeather (city: String){
+        Alamofire.request("\(openWeatherMapBaseURL)?APPID=\(openWeatherApiKey)&q=\(city)",method: .get).validate().responseJSON { (response) in
             switch response.result {
             case .success(let value):
                 let json = JSON(value)
@@ -45,10 +53,11 @@ class WeatherGetter {
             }
           
         }
-     
- 
+    }
     
-    return weather
+    
+    func getWeather() -> Weather{
+        return weather
     }
     
     func getCloudIcon(iconUrl: String, weather: Weather){
@@ -57,6 +66,11 @@ class WeatherGetter {
                 weather.iconClouds = data as NSData!
             }
         }
+    }
+    
+    
+    func setWeatherLocally(weather: Weather){
+        
     }
 }
     
