@@ -28,7 +28,7 @@
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Copiright (c) 2016 BertoniApp. All rights reserved" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3oo-EI-E9h">
                                 <frame key="frameInset" minX="31" minY="626" width="312" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="12"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
@@ -36,6 +36,7 @@
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="xb3-aO-Qok" firstAttribute="top" secondItem="3oo-EI-E9h" secondAttribute="bottom" constant="20" id="CRu-n6-ySH"/>
+                            <constraint firstItem="3oo-EI-E9h" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="KCg-FS-yRi"/>
                             <constraint firstItem="3oo-EI-E9h" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leadingMargin" constant="15" id="LDP-ua-tkb"/>
                             <constraint firstItem="9Gd-CA-K2n" firstAttribute="top" secondItem="Llm-lL-Icb" secondAttribute="bottom" constant="236" id="dFF-Co-fD2"/>
                             <constraint firstItem="3oo-EI-E9h" firstAttribute="width" secondItem="Ze5-6b-2t3" secondAttribute="height" multiplier="312:667" id="l3m-0w-Cpr"/>
