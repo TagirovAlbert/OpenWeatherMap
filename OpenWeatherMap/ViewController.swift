@@ -14,7 +14,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         let weather = WeatherGetter()
-        weather.getWeather(city: "Salavat")
+        let json = weather.getWeather(city: "Salavat")
         
     }
 
