@@ -27,7 +27,6 @@ class Weather: Object{
     dynamic var windSpeed = 0
     dynamic var featuresWeather: String = ""
     dynamic var humidity = 0
-    dynamic var iconClouds: NSData!
     
     
     

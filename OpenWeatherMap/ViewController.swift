@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource{
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, WeatherGetterDeligate{
     
     let realm = try! Realm()
     @IBOutlet weak var tableView: UITableView!
@@ -23,21 +23,19 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     override func viewDidLoad() {
         
         super.viewDidLoad()
-        weatherCollection = {realm.objects(Weather)}()
+        weatherGetter.delegate = self
+        dataReady()
         tableView.delegate = self
-        print(Realm.Configuration.defaultConfiguration.fileURL)
         tableView.dataSource = self
         
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "WeatherCell")
-        let cloudImage = cell?.viewWithTag(1) as! UIImageView
         let degrees = cell?.viewWithTag(2) as! UILabel
         let location = cell?.viewWithTag(3) as! UILabel
         let weatherOne = weatherCollection[indexPath.row]
         degrees.text = "\(weatherOne.temperature)°"
-        //cloudImage.image = UIImage(data: weatherOne.iconClouds as Data)
         location.text = "\(weatherOne.city), \(weatherOne.region)"
         return cell!
         
@@ -82,8 +80,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             print(cityName! + "!!!!!!!")
             let serialQueue = DispatchQueue(label: "weatherGetThread")
             serialQueue.sync {
-                for _ in  0...1{
-                    self.weatherGetter.setWeather(city: cityName!)}
+                self.weatherGetter.setWeather(city: cityName!)
                 for elemWeather in self.weatherCollection{
                     if elemWeather.city == cityName{
                         oldWeatherInfo = elemWeather
@@ -113,6 +110,11 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         try! self.realm.write {
             self.realm.add(weather)
         }
+    }
+    
+    func dataReady() {
+        self.weatherCollection = {realm.objects(Weather.self)}()
+        self.tableView.reloadData()
     }
     
     
