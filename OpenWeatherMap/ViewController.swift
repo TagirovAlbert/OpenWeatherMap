@@ -25,6 +25,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         super.viewDidLoad()
         weatherCollection = {realm.objects(Weather)}()
         tableView.delegate = self
+        print(Realm.Configuration.defaultConfiguration.fileURL)
         tableView.dataSource = self
         
     }

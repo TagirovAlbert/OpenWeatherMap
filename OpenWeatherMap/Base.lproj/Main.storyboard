@@ -35,12 +35,51 @@
                     <view key="view" contentMode="scaleToFill" id="dJC-Lh-OeL">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="nature" translatesAutoresizingMaskIntoConstraints="NO" id="WIb-Yz-DDc"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="11 °С" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hLI-Vs-4BH">
+                                <fontDescription key="fontDescription" name="HelveticaNeue-Bold" family="Helvetica Neue" pointSize="55"/>
+                                <color key="textColor" red="0.97479130642730605" green="0.98153311183474701" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Kazan, RU" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6V1-KA-G26">
+                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="23"/>
+                                <color key="textColor" red="0.96721347040250294" green="0.99118001705974967" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="clear sky" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FAx-mU-vq5">
+                                <frame key="frameInset" minX="139" minY="417" width="96" height="28"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="24"/>
+                                <color key="textColor" red="0.97641602124130211" green="1" blue="0.9896971902931877" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Jf0-BL-rtQ">
+                                <frame key="frameInset" minX="100" minY="261" width="175" height="148"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </imageView>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZXP-Az-DcY">
+                                <frame key="frameInset" minX="16" minY="456" width="100" height="100"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </imageView>
+                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="WIb-Yz-DDc" firstAttribute="centerY" secondItem="dJC-Lh-OeL" secondAttribute="centerY" constant="32" id="LKr-sO-pry"/>
+                            <constraint firstItem="hLI-Vs-4BH" firstAttribute="centerX" secondItem="6V1-KA-G26" secondAttribute="centerX" id="LeT-Bi-MKQ"/>
+                            <constraint firstItem="WIb-Yz-DDc" firstAttribute="leading" secondItem="dJC-Lh-OeL" secondAttribute="leadingMargin" constant="-16" id="QqR-dd-Zct"/>
+                            <constraint firstItem="6V1-KA-G26" firstAttribute="top" secondItem="t2A-pm-fbu" secondAttribute="bottom" constant="61" id="R5S-TO-VSm"/>
+                            <constraint firstItem="hLI-Vs-4BH" firstAttribute="top" secondItem="6V1-KA-G26" secondAttribute="bottom" constant="35" id="Vqx-do-bUP"/>
+                            <constraint firstItem="6V1-KA-G26" firstAttribute="width" secondItem="dJC-Lh-OeL" secondAttribute="height" multiplier="110:667" id="YkT-7Y-ZXO"/>
+                            <constraint firstItem="WIb-Yz-DDc" firstAttribute="top" secondItem="t2A-pm-fbu" secondAttribute="bottom" id="aQK-t6-SBX"/>
+                            <constraint firstItem="6V1-KA-G26" firstAttribute="centerX" secondItem="dJC-Lh-OeL" secondAttribute="centerX" id="i2V-8I-B2i"/>
+                            <constraint firstItem="WIb-Yz-DDc" firstAttribute="centerX" secondItem="dJC-Lh-OeL" secondAttribute="centerX" id="u0r-e4-lbj"/>
+                        </constraints>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Wzq-DP-DIm" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="770" y="206"/>
+            <point key="canvasLocation" x="768.79999999999995" y="205.54722638680661"/>
         </scene>
         <!--Weather today-->
         <scene sceneID="wJ5-DM-4Qs">
@@ -122,4 +161,7 @@
             <point key="canvasLocation" x="-12" y="184"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="nature" width="360" height="640"/>
+    </resources>
 </document>
