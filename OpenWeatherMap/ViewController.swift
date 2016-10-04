@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, WeatherGetterDeligate{
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource,  WeatherGetterDeligate{
     
     let realm = try! Realm()
     @IBOutlet weak var tableView: UITableView!
@@ -35,11 +35,24 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let degrees = cell?.viewWithTag(2) as! UILabel
         let location = cell?.viewWithTag(3) as! UILabel
         let weatherOne = weatherCollection[indexPath.row]
-        degrees.text = "\(weatherOne.temperature)°"
+        degrees.text = "\(weatherOne.temperature)°C"
         location.text = "\(weatherOne.city), \(weatherOne.region)"
         return cell!
         
         
+    }
+    
+    @IBAction func updateWeathers(_ sender: AnyObject) {
+        var tempWeather: Weather?
+        var weatherFromDB: Weather?
+        for weather in weatherCollection {
+            tempWeather = self.weatherGetter.getWeather(city: weather.city)
+            
+            weatherFromDB = { realm.object(ofType: Weather.self, forPrimaryKey: weather.id)}()
+            try! realm.write {
+                
+            }
+        }
     }
     
     func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
@@ -55,8 +68,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let deleteAction = UITableViewRowAction(style: .destructive, title: "Delete") { (UITableViewRowAction, indexPath:IndexPath) in
             try! self.realm.write {
                 self.realm.delete(self.weatherCollection[indexPath.row])
-                
             }
+            self.tableView.deleteRows(at: [indexPath], with: .fade)
             
           
         }
@@ -76,27 +89,27 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         let addWeatherAction = UIAlertAction(title: "Add City", style: .default) { (alert) in
             let textField = (alertController.textFields?[0])! as UITextField
-            let cityName = textField.text
+            let cityName = textField.text?.lowercased()
             print(cityName! + "!!!!!!!")
-            let serialQueue = DispatchQueue(label: "weatherGetThread")
-            serialQueue.sync {
-                self.weatherGetter.setWeather(city: cityName!)
-                for elemWeather in self.weatherCollection{
-                    if elemWeather.city == cityName{
-                        oldWeatherInfo = elemWeather
-                    }
+            for elemWeather in self.weatherCollection{
+                if elemWeather.city.lowercased() == cityName{
+                    oldWeatherInfo = elemWeather
                 }
             }
-            weatherToSave = self.weatherGetter.getWeather()
-            self.saveToDatabase(weather: weatherToSave!)
             
-            
-            /*}else{
+            if ((oldWeatherInfo) == nil){
+                let serialQueue = DispatchQueue(label: "setWeather")
+                serialQueue.sync {
+                    weatherToSave = self.weatherGetter.getWeather(city: cityName!)
+                    self.saveToDatabase(weather: weatherToSave!)
+                }
+                
+            }else{
                 let alertController1 = UIAlertController(title: "Error", message: "The city has already been added", preferredStyle: .alert)
                 let cancelAction1 = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
                 alertController1.addAction(cancelAction1)
-                self.presentingViewController?.addChildViewController(alertController1)
-            }*/
+                self.present(alertController1, animated: true, completion: nil)
+            }
             
         }
         
@@ -113,14 +126,19 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     func dataReady() {
-        self.weatherCollection = {realm.objects(Weather.self)}()
+        getListOfWeathers()
         self.tableView.reloadData()
     }
     
+    /*func reloadData(indexPath: IndexPath){
+        getListOfWeathers()
+        self.tableView.insertRows(at: [indexPath], with: UITableViewRowAnimation.left )
+       
+    }*/
     
-    
-    
-    
+    func getListOfWeathers(){
+        self.weatherCollection = {realm.objects(Weather.self)}()
+    }
     
     override func didReceiveMemoryWarning() {
         

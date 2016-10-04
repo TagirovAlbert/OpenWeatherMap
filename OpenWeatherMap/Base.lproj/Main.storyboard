@@ -171,12 +171,21 @@
                                             <frame key="frameInset" width="375" height="79"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="zFn-sf-xye">
+                                                    <color key="backgroundColor" red="0.27389398282600785" green="0.69490399263880209" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="tintColor" red="0.1365565840195555" green="0.64767426062558364" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <userDefinedRuntimeAttributes>
+                                                        <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                            <integer key="value" value="40"/>
+                                                        </userDefinedRuntimeAttribute>
+                                                    </userDefinedRuntimeAttributes>
+                                                </imageView>
                                                 <label opaque="NO" userInteractionEnabled="NO" tag="2" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pk6-TV-JfW">
                                                     <constraints>
                                                         <constraint firstAttribute="width" secondItem="pk6-TV-JfW" secondAttribute="height" multiplier="79:58" id="CtY-Ic-kBo"/>
                                                     </constraints>
                                                     <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="26"/>
-                                                    <nil key="textColor"/>
+                                                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" tag="3" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hOy-Os-vCO">
@@ -189,6 +198,9 @@
                                                 </label>
                                             </subviews>
                                             <constraints>
+                                                <constraint firstAttribute="bottomMargin" secondItem="zFn-sf-xye" secondAttribute="bottom" constant="5" id="Bmt-Rj-Swb"/>
+                                                <constraint firstItem="zFn-sf-xye" firstAttribute="leading" secondItem="chR-TA-oqg" secondAttribute="leadingMargin" constant="15" id="Bvj-dN-vJf"/>
+                                                <constraint firstItem="zFn-sf-xye" firstAttribute="width" secondItem="chR-TA-oqg" secondAttribute="height" multiplier="80:79" constant="-20" id="NhJ-WN-3rn"/>
                                                 <constraint firstItem="pk6-TV-JfW" firstAttribute="leading" secondItem="chR-TA-oqg" secondAttribute="leadingMargin" constant="4" id="TmC-Ci-d8d"/>
                                                 <constraint firstAttribute="bottomMargin" secondItem="pk6-TV-JfW" secondAttribute="bottom" constant="6" id="YKb-Ar-7fr"/>
                                                 <constraint firstItem="hOy-Os-vCO" firstAttribute="leading" secondItem="pk6-TV-JfW" secondAttribute="trailing" constant="8" id="Yjb-PY-eYR"/>
@@ -196,6 +208,7 @@
                                                 <constraint firstItem="pk6-TV-JfW" firstAttribute="top" secondItem="chR-TA-oqg" secondAttribute="topMargin" constant="-1" id="rwc-rr-b2K"/>
                                                 <constraint firstAttribute="trailingMargin" secondItem="hOy-Os-vCO" secondAttribute="trailing" constant="8" id="vTt-mu-vHE"/>
                                                 <constraint firstAttribute="bottomMargin" secondItem="hOy-Os-vCO" secondAttribute="bottom" constant="5" id="ymX-Bg-jyd"/>
+                                                <constraint firstItem="zFn-sf-xye" firstAttribute="top" secondItem="chR-TA-oqg" secondAttribute="topMargin" constant="-2" id="z0J-vU-rW4"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <connections>
@@ -214,8 +227,13 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Weather today" id="Sh6-qy-DLx">
+                        <barButtonItem key="leftBarButtonItem" style="plain" systemItem="refresh" id="fBW-x0-vvn">
+                            <inset key="imageInsets" minX="1" minY="0.0" maxX="0.0" maxY="0.0"/>
+                            <connections>
+                                <action selector="updateWeathers:" destination="hqS-9c-R59" id="gcZ-QQ-0bw"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="BEw-Lb-mRc">
-                            <color key="tintColor" red="0.0012486093737956727" green="0.0019371473553461138" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <connections>
                                 <action selector="addCity:" destination="hqS-9c-R59" id="N4m-dS-Dj4"/>
                             </connections>
@@ -227,11 +245,11 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="fmq-rD-8lU" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-12" y="183.95802098950526"/>
+            <point key="canvasLocation" x="-52" y="181"/>
         </scene>
     </scenes>
     <resources>
-        <image name="humidity" width="288" height="364"/>
+        <image name="humidity" width="350" height="442"/>
         <image name="nature" width="360" height="640"/>
         <image name="pressure" width="128" height="448"/>
         <image name="wind" width="416" height="288"/>
