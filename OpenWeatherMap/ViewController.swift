@@ -8,13 +8,14 @@
 
 import UIKit
 import RealmSwift
+import SwiftyJSON
 
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource,  WeatherGetterDeligate{
     
     let realm = try! Realm()
     @IBOutlet weak var tableView: UITableView!
     var weatherCollection: Results<Weather>!
-    var tempSlv: Weather?
+    var tempWet = Weather()
     var weatherGetter = WeatherGetter()
     
     
@@ -86,7 +87,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 }
             }
             DispatchQueue.global().sync {
-                weatherToSave = self.weatherGetter.getWeather(city: cityName!)
+                self.weatherGetter.getWeather(city: cityName!)
+                weatherToSave = self.tempWet
                 
             }
             if ((oldWeatherInfo) == nil){
@@ -130,17 +132,15 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
-    func dataReady() {
-        getListOfWeathers()
-        self.tableView.reloadData()
-    }
+    
     
     @IBAction func updateWeathers(_ sender: AnyObject) {
         var tempWeather: Weather?
         var weatherFromDB: Weather?
         for weather in weatherCollection {
             DispatchQueue.global().sync {
-                tempWeather = self.weatherGetter.getWeather(city: weather.city)
+                self.weatherGetter.getWeather(city: weather.city)
+                tempWeather = tempWet
             }
             weatherFromDB = { realm.object(ofType: Weather.self, forPrimaryKey: weather.id)}()
             updateParams(saveWeather: tempWeather!, oldWeather: weatherFromDB!)
@@ -158,6 +158,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
      
      }*/
     
+    // MARK: Ыecondary functions
     func alertCityExist(){
         let alertController1 = UIAlertController(title: "Error", message: "The city has already been added", preferredStyle: .alert)
         let cancelAction1 = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
@@ -190,8 +191,47 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
         
     }
+    // MARK: WeatherGetter delegate
+    func failure(){
+        let failController = UIAlertController(title: "Error", message: "Lose connection with internet", preferredStyle: .alert)
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        failController.addAction(cancelAction)
+        self.present(failController, animated: true, completion: nil)
+    }
     
+    func dataReady() {
+        getListOfWeathers()
+        self.tableView.reloadData()
+    }
     
+    func createWeatherModel(json: JSON){
+        let weatherTemp = Weather(key: self.incrementID())
+        if json["cod"].intValue == 200{
+            weatherTemp.city = json["name"].stringValue
+            weatherTemp.enable = true
+            weatherTemp.humidity = json["main"]["humidity"].int!
+            weatherTemp.pressure = json["main"]["pressure"].int!
+            weatherTemp.featuresWeather = json["weather"][0]["description"].stringValue
+            weatherTemp.region = json["sys"]["country"].stringValue
+            weatherTemp.windSpeed = json["wind"]["speed"].int!
+            weatherTemp.temperature = json["main"]["temp"].int!
+        }else{
+            weatherTemp.featuresWeather = json["message"].stringValue
+        }
+        self.tempWet = weatherTemp
+
+    }
+    func incrementID() -> Int {
+        var elem = 0
+        DispatchQueue.main.async {
+            let realm = try! Realm()
+            elem = (realm.objects(Weather.self).max(ofProperty: "id") as Int? ?? 0) + 1
+        }
+        return elem
+    }
+        
+    
+    // MARK: prepare segue
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let detailWeatherViewController = segue.destination as! DetailWeatherViewController
         detailWeatherViewController.selectedWeather = self.selectedWeather
