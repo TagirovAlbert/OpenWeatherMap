@@ -19,6 +19,7 @@ class Weather: Object{
         self.id = key
     }
     
+    var enable: Bool = false
     private var _temp: Int = 0
     dynamic var temperature: Int{
         get{ return _temp }
