@@ -14,7 +14,7 @@ import RealmSwift
 protocol  WeatherGetterDeligate {
     func dataReady()
     func createWeatherModel(json: JSON)
-    func failure()
+    func failure(error: String)
 }
 
 class WeatherGetter{
@@ -37,7 +37,8 @@ class WeatherGetter{
                 self.delegate?.dataReady()
             
             case .failure(let error):
-                print(error)
+                print("\(error)!!!!!!!!!")
+                self.delegate?.failure(error: error.localizedDescription)
             
         }
     }

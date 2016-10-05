@@ -68,8 +68,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     @IBAction func addCity(_ sender: AnyObject) {
-        var weatherToSave = Weather()
-        var oldWeatherInfo: Weather?
+        var weatherToSave = Weather(key: incrementID())
         let alertController = UIAlertController(title: "Add New City", message: "Add a new city to see weather there", preferredStyle: .alert)
         alertController.addTextField { (textField: UITextField) in
             textField.placeholder = "Enter City"
@@ -80,27 +79,30 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let addWeatherAction = UIAlertAction(title: "Add City", style: .default) { (alert) in
             let textField = (alertController.textFields?[0])! as UITextField
             let cityName = textField.text?.lowercased()
-            print(cityName! + "!!!!!!!")
-            for elemWeather in self.weatherCollection{
-                if elemWeather.city.lowercased() == cityName{
-                    oldWeatherInfo = elemWeather
-                }
-            }
+            var flag = true
             DispatchQueue.global().sync {
                 self.weatherGetter.getWeather(city: cityName!)
-                weatherToSave = self.tempWet
-                
             }
-            if ((oldWeatherInfo) == nil){
-                if   (weatherToSave.enable) {
-                    self.saveToDatabase(weather: weatherToSave)
-                }else if !(weatherToSave.featuresWeather == ""){
-                    self.alertErrorMessages(message: (weatherToSave.featuresWeather))
+            weatherToSave = self.tempWet
+            print(cityName! + "!!!!!!!")
+            for elemWeather in self.weatherCollection{
+                if (elemWeather.city.lowercased() == cityName) || (weatherToSave.city == cityName){
+                    flag = false
                 }
-                
-            }else{
-                self.alertCityExist()
             }
+            
+                if flag{
+                    if   (weatherToSave.enable) {
+                        self.saveToDatabase(weather: weatherToSave)
+                    }else if !(weatherToSave.featuresWeather == ""){
+                        self.alertErrorMessages(message: (weatherToSave.featuresWeather))
+                    }
+                    
+                }else{
+                    self.alertCityExist()
+                
+            }
+            
             //   if (weatherToSave?.enable == true) || (weatherToSave?.featuresWeather == ""){
             //self.saveToDatabase(weather: self.tempSlv!)
             //   }else{
@@ -135,19 +137,23 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     
     @IBAction func updateWeathers(_ sender: AnyObject) {
-        var tempWeather: Weather?
         var weatherFromDB: Weather?
         for weather in weatherCollection {
-            DispatchQueue.global().sync {
-                self.weatherGetter.getWeather(city: weather.city)
-                tempWeather = tempWet
+            DispatchQueue.main.async {
+                print(weather.city+"??????")
+                var tempWeather: Weather?
+                DispatchQueue.global().sync {
+                    self.weatherGetter.getWeather(city: weather.city)
+                    tempWeather = self.tempWet
+                }
+                weatherFromDB = { self.realm.object(ofType: Weather.self, forPrimaryKey: weather.id)}()
+                self.updateParams(saveWeather: tempWeather!, oldWeather: weatherFromDB!)
+                try! self.realm.write {
+                    self.realm.add(weatherFromDB!)
+                }
+
             }
-            weatherFromDB = { realm.object(ofType: Weather.self, forPrimaryKey: weather.id)}()
-            updateParams(saveWeather: tempWeather!, oldWeather: weatherFromDB!)
-            try! realm.write {
-                realm.add(weatherFromDB!)
             }
-        }
     }
     
     
@@ -192,8 +198,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
     }
     // MARK: WeatherGetter delegate
-    func failure(){
-        let failController = UIAlertController(title: "Error", message: "Lose connection with internet", preferredStyle: .alert)
+    func failure(error: String){
+        let failController = UIAlertController(title: "Error", message: "\(error)", preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         failController.addAction(cancelAction)
         self.present(failController, animated: true, completion: nil)
@@ -222,12 +228,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 
     }
     func incrementID() -> Int {
-        var elem = 0
-        DispatchQueue.main.async {
-            let realm = try! Realm()
-            elem = (realm.objects(Weather.self).max(ofProperty: "id") as Int? ?? 0) + 1
-        }
-        return elem
+        
+        
+        return (self.realm.objects(Weather.self).max(ofProperty: "id") as Int? ?? 0) + 1
     }
         
     
