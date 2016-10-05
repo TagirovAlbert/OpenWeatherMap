@@ -79,6 +79,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let addWeatherAction = UIAlertAction(title: "Add City", style: .default) { (alert) in
             let textField = (alertController.textFields?[0])! as UITextField
             let cityName = textField.text?.lowercased()
+            if cityName == ""{
+                self.alertErrorMessages(message: "Empty field, enter city")
+            }else{
             var flag = true
             DispatchQueue.global().sync {
                 self.weatherGetter.getWeather(city: cityName!)
@@ -101,7 +104,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 }else{
                     self.alertCityExist()
                 
-            }
+                }}
             
             //   if (weatherToSave?.enable == true) || (weatherToSave?.featuresWeather == ""){
             //self.saveToDatabase(weather: self.tempSlv!)
@@ -130,7 +133,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             self.realm.add(weather)
             //}
             //}
-            
         }
     }
     

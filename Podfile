@@ -13,4 +13,5 @@ target ‘OpenWeatherMap’ do
     pod 'Alamofire', '~> 4.0'
     pod ‘SwiftyJSON’
     pod 'RealmSwift'
+    
 end

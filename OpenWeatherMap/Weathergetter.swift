@@ -38,8 +38,12 @@ class WeatherGetter{
             
             case .failure(let error):
                 print("\(error)!!!!!!!!!")
-                self.delegate?.failure(error: error.localizedDescription)
-            
+                let errorString = error.localizedDescription
+                if errorString.hasPrefix("URL is not valid"){
+                    self.delegate?.failure(error: "Invalid parameter")
+                }else if errorString.hasPrefix(""){
+                self.delegate?.failure(error: errorString)
+                }
         }
     }
     }
