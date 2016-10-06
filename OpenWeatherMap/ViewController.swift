@@ -7,15 +7,16 @@
 //
 
 import UIKit
-import RealmSwift
 import SwiftyJSON
+import CoreData
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource,  WeatherGetterDeligate{
+class ViewController: UIViewController,NSFetchedResultsControllerDelegate, UITableViewDelegate, UITableViewDataSource, WeatherGetterDeligate{
     
-    let realm = try! Realm()
+    var fetchResultController: NSFetchedResultsController<Weather>!
     @IBOutlet weak var tableView: UITableView!
-    var weatherCollection: Results<Weather>!
-    var tempWet = Weather()
+    let managedContext = (UIApplication.shared.delegate as! AppDelegate).managedObjectContext
+    var weatherCollection: [Weather] = []
+    var weatherSave: Weather!
     var weatherGetter = WeatherGetter()
     
     
@@ -25,8 +26,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         super.viewDidLoad()
         weatherGetter.delegate = self
+        updateWeatherInDB()
         dataReady()
-        print(Realm.Configuration.defaultConfiguration.fileURL)
         tableView.delegate = self
         tableView.dataSource = self
         
@@ -55,21 +56,43 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         return weatherCollection.count
     }
     
+    
+    
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
-        let deleteAction = UITableViewRowAction(style: .destructive, title: "Delete") { (UITableViewRowAction, indexPath:IndexPath) in
-            try! self.realm.write {
-                self.realm.delete(self.weatherCollection[indexPath.row])
+        let deleteAction = UITableViewRowAction(style: .destructive, title: "Delete") {_,_ in 
+           let restaurantToRemove = self.fetchResultController.object(at: indexPath) 
+           self.managedContext.delete(restaurantToRemove)
+            if self.managedContext.hasChanges{
+                do{
+                   try self.managedContext.save()
+                }catch let error as NSError{
+                    NSLog("Ошибка: \(error), \(error.localizedDescription)")
+                    abort()
+                }
             }
-            self.tableView.deleteRows(at: [indexPath], with: .fade)
-            
-            
         }
         deleteAction.backgroundColor = UIColor.red
         return[deleteAction]
     }
     
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        
+        switch  type {
+        case .delete:
+            tableView.deleteRows(at: [indexPath!], with: .fade)
+        case .insert:
+            tableView.insertRows(at: [newIndexPath!], with: .fade)
+        case .update:
+            tableView.reloadRows(at: [indexPath!], with: .fade)
+        default:
+            tableView.reloadData()
+        }
+        weatherCollection = controller.fetchedObjects as! [Weather]
+        
+    }
+    
     @IBAction func addCity(_ sender: AnyObject) {
-        var weatherToSave = Weather(key: incrementID())
+        var weatherToSave = Weather()
         let alertController = UIAlertController(title: "Add New City", message: "Add a new city to see weather there", preferredStyle: .alert)
         alertController.addTextField { (textField: UITextField) in
             textField.placeholder = "Enter City"
@@ -82,24 +105,26 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             let cityName = textField.text?.lowercased()
             if cityName == ""{
                 self.alertErrorMessages(message: "Empty field, enter city")
+            }else if (cityName?.characters.count)! > 15{
+                self.alertErrorMessages(message: "Name of city is so long( maximun 15 symbols)")
             }else{
             var flag = true
-            DispatchQueue.global().sync {
-                self.weatherGetter.getWeather(city: cityName!)
-            }
-            weatherToSave = self.tempWet
+            self.weatherGetter.getRequestWeather(city: cityName!)
+            print(self.weatherGetter.getWeather())
+                if (self.weatherGetter.getWeather().entity != nil){
+            weatherToSave = self.weatherGetter.getWeather()
             print(cityName! + "!!!!!!!")
             for elemWeather in self.weatherCollection{
-                if (elemWeather.city.lowercased() == cityName) || (weatherToSave.city == cityName){
+                if (elemWeather.city?.lowercased() == cityName) || (weatherToSave.city == cityName){
                     flag = false
                 }
             }
             
                 if flag{
-                    if   (weatherToSave.enable) {
+                    if   (weatherToSave.enabled?.boolValue)! {
                         self.saveToDatabase(weather: weatherToSave)
                     }else if !(weatherToSave.featuresWeather == ""){
-                        self.alertErrorMessages(message: (weatherToSave.featuresWeather))
+                        self.alertErrorMessages(message: (weatherToSave.featuresWeather)!)
                     }
                     
                 }else{
@@ -116,7 +141,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             //}else{
             //   self.alertCityExist()
             
-            
+            }
             
         }
         
@@ -127,37 +152,47 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     func saveToDatabase(weather: Weather) {
-        //let collect = { self.realm.objects(Weather.self)}
-        //for elem in collect(){
-        //  if !(elem.city == weather.city){
-        try! self.realm.write {
-            self.realm.add(weather)
-            //}
-            //}
+        weatherSave = NSEntityDescription.insertNewObject(forEntityName: "Weather", into: managedContext) as! Weather
+        weatherSave = weather
+        if managedContext.hasChanges{
+            do{
+                try managedContext.save()
+            }catch{
+                let nsError = error as NSError
+                NSLog("произошла ошибка \(nsError), \(nsError.userInfo)")
+            }
         }
     }
+    
+    func updateWeatherInDB(){
+        let fetchRequest: NSFetchRequest<Weather>  = Weather.fetchRequest()
+        do{
+            let fetchResults = try managedContext.fetch(fetchRequest) as! [Weather]
+            if !(fetchResults.isEmpty){
+                for entity in fetchResults{
+                   self.weatherGetter.getRequestWeather(city: entity.city!)
+                   let newWeather = weatherGetter.getWeather()
+                   updateParams(saveWeather: newWeather, oldWeather: entity)
+                }
+            }
+        }catch let error as NSError{
+            NSLog("ошибка: \(error)")
+        }
+        
+        do{
+           try self.managedContext.save()
+        }catch let error as NSError{
+            NSLog("ошибка: \(error.localizedDescription)")
+        }
+     }
     
     
     
     @IBAction func updateWeathers(_ sender: AnyObject) {
-        var weatherFromDB: Weather?
-        for weather in weatherCollection {
-            DispatchQueue.main.async {
-                print(weather.city+"??????")
-                var tempWeather: Weather?
-                DispatchQueue.global().sync {
-                    self.weatherGetter.getWeather(city: weather.city)
-                    tempWeather = self.tempWet
-                }
-                weatherFromDB = { self.realm.object(ofType: Weather.self, forPrimaryKey: weather.id)}()
-                self.updateParams(saveWeather: tempWeather!, oldWeather: weatherFromDB!)
-                try! self.realm.write {
-                    self.realm.add(weatherFromDB!)
-                }
-
-            }
-            }
+       updateWeatherInDB()
     }
+    
+    
     
     
     
@@ -167,7 +202,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
      
      }*/
     
-    // MARK: Ыecondary functions
+    // MARK: - Secondary functions
     func alertCityExist(){
         let alertController1 = UIAlertController(title: "Error", message: "The city has already been added", preferredStyle: .alert)
         let cancelAction1 = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
@@ -183,7 +218,26 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     func getListOfWeathers(){
-        self.weatherCollection = {realm.objects(Weather.self)}()
+        let fetchRequest: NSFetchRequest<Weather> = Weather.fetchRequest()
+        let sortDescription = NSSortDescriptor(key: "city", ascending: true)
+        fetchRequest.sortDescriptors = [sortDescription]
+        fetchResultController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: managedContext, sectionNameKeyPath: nil, cacheName: nil)
+        
+        fetchResultController.delegate = self
+        var error: NSError?
+        var result: Bool
+        do{
+            try fetchResultController.performFetch()
+            result = true
+        }catch let error1 as NSError{
+            error = error1
+            result = false
+        }
+        weatherCollection = fetchResultController.fetchedObjects! as [Weather]
+        
+        if result == false{
+            print("описание ошибки \(error?.localizedDescription)")
+        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -191,16 +245,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     func updateParams(saveWeather: Weather, oldWeather: Weather){
-        try! realm.write {
             oldWeather.featuresWeather = saveWeather.featuresWeather
             oldWeather.humidity = saveWeather.humidity
             oldWeather.windSpeed = saveWeather.windSpeed
             oldWeather.temperature = saveWeather.temperature
             oldWeather.pressure = saveWeather.pressure
-        }
-        
     }
-    // MARK: WeatherGetter delegate
+    
+    // MARK: - WeatherGetter delegate
     func failure(error: String){
         let failController = UIAlertController(title: "Error", message: "\(error)", preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
@@ -213,31 +265,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         self.tableView.reloadData()
     }
     
-    func createWeatherModel(json: JSON){
-        let weatherTemp = Weather(key: self.incrementID())
-        if json["cod"].intValue == 200{
-            weatherTemp.city = json["name"].stringValue
-            weatherTemp.enable = true
-            weatherTemp.humidity = json["main"]["humidity"].int!
-            weatherTemp.pressure = json["main"]["pressure"].int!
-            weatherTemp.featuresWeather = json["weather"][0]["description"].stringValue
-            weatherTemp.region = json["sys"]["country"].stringValue
-            weatherTemp.windSpeed = json["wind"]["speed"].int!
-            weatherTemp.temperature = json["main"]["temp"].int!
-        }else{
-            weatherTemp.featuresWeather = json["message"].stringValue
-        }
-        self.tempWet = weatherTemp
-
-    }
-    func incrementID() -> Int {
-        
-        
-        return (self.realm.objects(Weather.self).max(ofProperty: "id") as Int? ?? 0) + 1
-    }
-        
     
-    // MARK: prepare segue
+    
+    // MARK: - prepare segue
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let detailWeatherViewController = segue.destination as! DetailWeatherViewController
         detailWeatherViewController.selectedWeather = self.selectedWeather
