@@ -22,12 +22,12 @@ class DetailWeatherViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         if let weather = self.selectedWeather{
-            self.wind.text = "\(weather.windSpeed) m/s"
-            self.pressure.text = "\(weather.pressure) mmHg"
-            self.humidity.text = "\(weather.humidity) %"
-            self.city.text = "\(weather.city), \(weather.region)"
-            self.descriptionWeather.text = "\(weather.featuresWeather)"
-            self.temperature.text = "\(weather.temperature)°С"
+            self.wind.text = "\(weather.windSpeed!) m/s"
+            self.pressure.text = "\(weather.pressure!) mmHg"
+            self.humidity.text = "\(weather.humidity!) %"
+            self.city.text = "\(weather.city!), \(weather.region!)"
+            self.descriptionWeather.text = "\(weather.featuresWeather!)"
+            self.temperature.text = "\(weather.temperature!)°С"
             
         }
     }

@@ -27,7 +27,7 @@ class Weather: NSManagedObject{
     }
     @NSManaged var windSpeed: NSNumber?
     @NSManaged var featuresWeather: String?
-    @NSManaged var humidity: NSNumber
+    @NSManaged var humidity: NSNumber?
     
     
     

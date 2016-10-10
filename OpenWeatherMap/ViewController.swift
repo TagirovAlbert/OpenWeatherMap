@@ -9,6 +9,7 @@
 import UIKit
 import SwiftyJSON
 import CoreData
+import Alamofire
 
 class ViewController: UIViewController,NSFetchedResultsControllerDelegate, UITableViewDelegate, UITableViewDataSource, WeatherGetterDeligate{
     
@@ -16,8 +17,8 @@ class ViewController: UIViewController,NSFetchedResultsControllerDelegate, UITab
     @IBOutlet weak var tableView: UITableView!
     let managedContext = (UIApplication.shared.delegate as! AppDelegate).managedObjectContext
     var weatherCollection: [Weather] = []
-    var weatherSave: Weather!
     var weatherGetter = WeatherGetter()
+    let hud = MBProgressHUD()
     
     
     var selectedWeather: Weather!
@@ -26,7 +27,7 @@ class ViewController: UIViewController,NSFetchedResultsControllerDelegate, UITab
         
         super.viewDidLoad()
         weatherGetter.delegate = self
-        updateWeatherInDB()
+        print("Start")
         dataReady()
         tableView.delegate = self
         tableView.dataSource = self
@@ -38,8 +39,8 @@ class ViewController: UIViewController,NSFetchedResultsControllerDelegate, UITab
         let degrees = cell?.viewWithTag(2) as! UILabel
         let location = cell?.viewWithTag(3) as! UILabel
         let weatherOne = weatherCollection[indexPath.row]
-        degrees.text = "\(weatherOne.temperature)°C"
-        location.text = "\(weatherOne.city), \(weatherOne.region)"
+        degrees.text = "\(weatherOne.temperature!)°C"
+        location.text = "\(weatherOne.city!), \(weatherOne.region!)"
         return cell!
         
         
@@ -65,6 +66,8 @@ class ViewController: UIViewController,NSFetchedResultsControllerDelegate, UITab
             if self.managedContext.hasChanges{
                 do{
                    try self.managedContext.save()
+                   self.tableView.deleteRows(at: [indexPath], with: .fade)
+                    
                 }catch let error as NSError{
                     NSLog("Ошибка: \(error), \(error.localizedDescription)")
                     abort()
@@ -78,12 +81,6 @@ class ViewController: UIViewController,NSFetchedResultsControllerDelegate, UITab
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         
         switch  type {
-        case .delete:
-            tableView.deleteRows(at: [indexPath!], with: .fade)
-        case .insert:
-            tableView.insertRows(at: [newIndexPath!], with: .fade)
-        case .update:
-            tableView.reloadRows(at: [indexPath!], with: .fade)
         default:
             tableView.reloadData()
         }
@@ -91,59 +88,39 @@ class ViewController: UIViewController,NSFetchedResultsControllerDelegate, UITab
         
     }
     
+    
     @IBAction func addCity(_ sender: AnyObject) {
-        var weatherToSave = Weather()
         let alertController = UIAlertController(title: "Add New City", message: "Add a new city to see weather there", preferredStyle: .alert)
         alertController.addTextField { (textField: UITextField) in
             textField.placeholder = "Enter City"
         }
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-        
         let addWeatherAction = UIAlertAction(title: "Add City", style: .default) { (alert) in
-            let textField = (alertController.textFields?[0])! as UITextField
-            let cityName = textField.text?.lowercased()
-            if cityName == ""{
-                self.alertErrorMessages(message: "Empty field, enter city")
-            }else if (cityName?.characters.count)! > 15{
-                self.alertErrorMessages(message: "Name of city is so long( maximun 15 symbols)")
-            }else{
-            var flag = true
-            self.weatherGetter.getRequestWeather(city: cityName!)
-            print(self.weatherGetter.getWeather())
-                if (self.weatherGetter.getWeather().entity != nil){
-            weatherToSave = self.weatherGetter.getWeather()
-            print(cityName! + "!!!!!!!")
-            for elemWeather in self.weatherCollection{
-                if (elemWeather.city?.lowercased() == cityName) || (weatherToSave.city == cityName){
-                    flag = false
-                }
-            }
-            
-                if flag{
-                    if   (weatherToSave.enabled?.boolValue)! {
-                        self.saveToDatabase(weather: weatherToSave)
-                    }else if !(weatherToSave.featuresWeather == ""){
-                        self.alertErrorMessages(message: (weatherToSave.featuresWeather)!)
-                    }
-                    
+                let textField = (alertController.textFields?[0])! as UITextField
+                let cityName = textField.text?.lowercased()
+                if cityName == ""{
+                    self.alertErrorMessages(message: "Empty field, enter city")
+                }else if (cityName?.characters.count)! > 15{
+                    self.alertErrorMessages(message: "Name of city is so long( maximun 15 symbols)")
                 }else{
-                    self.alertCityExist()
+                    self.startActivityIdicator()
+                    self.weatherGetter.getRequestWeather(city: cityName!, controller: self)
+                    
+                    //   if (weatherToSave?.enable == true) || (weatherToSave?.featuresWeather == ""){
+                    //self.saveToDatabase(weather: self.tempSlv!)
+                    //   }else{
+                    //      self.alertErrorMessages(message: (weatherToSave?.featuresWeather)!)
+                    // }
+                    
+                    //}else{
+                    //   self.alertCityExist()
+                    
                 
-                }}
-            
-            //   if (weatherToSave?.enable == true) || (weatherToSave?.featuresWeather == ""){
-            //self.saveToDatabase(weather: self.tempSlv!)
-            //   }else{
-            //      self.alertErrorMessages(message: (weatherToSave?.featuresWeather)!)
-            // }
-            
-            //}else{
-            //   self.alertCityExist()
-            
+                
             }
-            
         }
+        
         
         alertController.addAction(cancelAction)
         alertController.addAction(addWeatherAction)
@@ -151,9 +128,42 @@ class ViewController: UIViewController,NSFetchedResultsControllerDelegate, UITab
         
     }
     
+    func headerNewWeather(weather: Weather ,cityName:String){
+        var flag = true
+        print(cityName + "!!!!!!!")
+        for elemWeather in self.weatherCollection{
+            if (elemWeather.city?.lowercased() == cityName) || (weather.city == cityName){
+                flag = false
+            }
+        }
+        
+        if flag{
+            if   (weather.enabled?.boolValue)! {
+                print(weather)
+                if managedContext.hasChanges{
+                    do{
+                        try managedContext.save()
+                        dataReady()
+                    }catch{
+                        let nsError = error as NSError
+                        NSLog("произошла ошибка \(nsError), \(nsError.userInfo)")
+                    }
+                }
+            }else if !(weather.featuresWeather == ""){
+                self.alertErrorMessages(message: (weather.featuresWeather)!)
+            }
+            
+        }else{
+            self.alertCityExist()
+            
+        }
+        DispatchQueue.main.async {
+            self.stopActivityIndiactor()
+        }
+    
+    }
+    
     func saveToDatabase(weather: Weather) {
-        weatherSave = NSEntityDescription.insertNewObject(forEntityName: "Weather", into: managedContext) as! Weather
-        weatherSave = weather
         if managedContext.hasChanges{
             do{
                 try managedContext.save()
@@ -167,12 +177,11 @@ class ViewController: UIViewController,NSFetchedResultsControllerDelegate, UITab
     func updateWeatherInDB(){
         let fetchRequest: NSFetchRequest<Weather>  = Weather.fetchRequest()
         do{
-            let fetchResults = try managedContext.fetch(fetchRequest) as! [Weather]
+            let fetchResults = try managedContext.fetch(fetchRequest) 
             if !(fetchResults.isEmpty){
                 for entity in fetchResults{
-                   self.weatherGetter.getRequestWeather(city: entity.city!)
-                   let newWeather = weatherGetter.getWeather()
-                   updateParams(saveWeather: newWeather, oldWeather: entity)
+                   self.weatherGetter.getRequestWeather(city: entity.city!, controller: self)
+                //   updateParams(saveWeather: self.weatherGetter, oldWeather: entity)
                 }
             }
         }catch let error as NSError{
@@ -264,6 +273,45 @@ class ViewController: UIViewController,NSFetchedResultsControllerDelegate, UITab
         getListOfWeathers()
         self.tableView.reloadData()
     }
+    
+    func createWeatherModel(json: JSON) -> Weather{
+        
+        let weatherTemp = NSEntityDescription.insertNewObject(forEntityName: "Weather", into: managedContext) as! Weather
+        if json["cod"].intValue == 200{
+            print(weatherTemp.classForCoder)
+            print(weatherTemp.city)
+            weatherTemp.city = json["name"].stringValue
+            weatherTemp.enabled = NSNumber.init(booleanLiteral: true)
+            weatherTemp.humidity = (json["main"]["humidity"].int! as NSNumber?)!
+            weatherTemp.pressure = json["main"]["pressure"].int!
+            weatherTemp.featuresWeather = json["weather"][0]["description"].stringValue
+            weatherTemp.region = json["sys"]["country"].stringValue
+            weatherTemp.windSpeed = json["wind"]["speed"].int! as NSNumber?
+            weatherTemp.temperature = json["main"]["temp"].int!
+        }else{
+            weatherTemp.featuresWeather = json["message"].stringValue
+        }
+        print(weatherTemp)
+        return weatherTemp
+        
+    }
+    
+    func startActivityIdicator(){
+        
+        let loadingNotif = MBProgressHUD.showAdded(to: self.view, animated: true)
+        loadingNotif.label.text = "Loading..."
+        loadingNotif.mode = MBProgressHUDMode.indeterminate
+        self.view.addSubview(loadingNotif)
+        loadingNotif.show(animated: true)
+        
+    }
+    
+    func stopActivityIndiactor(){
+            MBProgressHUD.hide(for: self.view, animated: true)
+        
+    }
+        
+    
     
     
     
